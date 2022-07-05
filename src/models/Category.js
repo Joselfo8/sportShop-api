@@ -7,6 +7,10 @@ module.exports = (sequelize) => {
       name: {
         type: DataTypes.STRING,
         allowNull: false,
+        validate: {
+          notEmpty: { msg: "The Name is required!" },
+          len: [1, 50],
+        }
       },
       description: {
         type: DataTypes.STRING,
