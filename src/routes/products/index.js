@@ -1,8 +1,8 @@
 const router = require("express").Router();
-const { newProduct } = require("../handleDB");
+const { newProduct } = require("./function");
 const { getProductByName, getDBproducts } = require("./function");
-import Category from "../../models/Category";
-import Product from "../../models/Product";
+const Category = require("../../models/Category");
+const Product = require("../../models/Product");
 
 router.get("", (req, res) => {
   newProduct("producto1", 1, "descripcion1").then(() => {
@@ -12,41 +12,42 @@ router.get("", (req, res) => {
 //post /Product
 const postProduct = async (req, res, next) => {
   const { title, price, description, categoryName } = req.body;
-  if (!title.length > 0 || !title.length < 25 || !title.char[0] !== " " || !categoryName) {
+  if (
+    !title.length > 0 ||
+    !title.length < 25 ||
+    !title.char[0] !== " " ||
+    !categoryName
+  ) {
     res.status(400).send("there is not product with that name");
-  }
-  else {
+  } else {
     try {
       const productCreated = await Product.create({
         title,
         price,
-        description
-      })
+        description,
+      });
       const category = await Category.findOne({
         where: {
           name,
-        }
-      })
-    }
-    catch (error) {
+        },
+      });
+    } catch (error) {
       next(error);
-      res.send(error)
+      res.send(error);
     }
   }
-}
+};
 
 //GET ALL PRODUCTS
 const getAllProducts = async (req, res, next) => {
   //res.send('<h1>get all products</h1>')
   try {
-    const products = await getDBproducts()
+    const products = await getDBproducts();
     res.status(200).send(products);
-
-  }
-  catch (err) {
+  } catch (err) {
     next(err);
   }
-}
+};
 
 //__GET /Product/ByName/:name
 const getByName = async (req, res, next) => {

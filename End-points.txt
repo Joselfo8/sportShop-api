@@ -1,27 +1,28 @@
-/products
+este servidor aun no se ha deployado cuando se haga deploy las direcciones van a cambiar
+
+PRODUCTOS
+
+1)para buscar productos por su nombre:
+    -envia en la palabra "search" el nombre a buscar por ejemplo (pantalon)
+    http://localhost:3000/products?search=pantalon
+
+2)para buscar producto por su nombre y su categoria
+    -envia en la palabra "search" el nombre a buscar por ejemplo (pantalon) y en la palabra category la categoria por ejemplo(deportivo)
+
+    -las categorias son:
+    .deportivo
+    .masculino
+    .femenino
+    .infantil
+        !!!LAS CATEGORIAS TIENEN QUE ESTAR ESCRITAS TAL CUAL ESTAN AQUI no como(Deportivo,deportes,hombre mujer,masCuliNo)!!!
+
+    http://localhost:3000/products/?search=pantalon&category=deportivo
 
 
-1)imagen,nombre,precio,
+3)para pedir los detalles especificos de un producto:
+    -envia dentro del parametro "id" el id del producto(siempre se envia un producto con su respectivo id, asi que usted deberia tenerlo)
+    http://localhodt:3000/products/id/
 
-
-
-/users
-
-1).
-
-
-/detalles
-
-1)nombre
-2)imagen
-3)tallas disponibles --> []
- -tallas de zapatos -->[35,36,37,38,39,40,41,42,43]
- -tallas de pantalones -->[6,8,10,12,40,42,44,46,48]
- -tallas de ropa -->[xs,s,m,l,xl]
-4)description
-5)categorias --> [hombre,mujer,infantil,deporte]
-
-
-
-
-http://localhost:4040/products?search=camisas&category=
+4)para pedir todos los productos sin filtrar ni por nombre ni por categoria
+    -envie los datos al URL principal sin ninguna palabra de más
+    http://localhost:3000/products
