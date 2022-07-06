@@ -11,5 +11,5 @@ router.get("/health", (req, res) => {
 router.use("/products", products);
 /* router.get("/:name", getByName);
 router.get("", getAllProducts);
-router.post("", postProduct); */
+router.post("", postProduct);*/
 module.exports = router;
