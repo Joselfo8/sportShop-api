@@ -1,6 +1,6 @@
 const { Router } = require("express");
 // Importar todos los routers;
-const { products } = require("./products");
+const { products,/* postProduct,getAllProducts, getByName */ } = require("./products");
 
 const router = Router();
 
@@ -9,5 +9,7 @@ router.get("/health", (req, res) => {
 });
 // Configurar los routers
 router.use("/products", products);
-
+/* router.get("/:name", getByName);
+router.get("", getAllProducts);
+router.post("", postProduct); */
 module.exports = router;

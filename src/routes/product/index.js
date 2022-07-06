@@ -63,6 +63,10 @@ const getByName = async (req, res, next) => {
     next(err);
   }
 };
+
+//module.exports = {
+//  postProduct, getAllProducts, getByName
+//}
 router.get("/:name", getByName);
 router.get("", getAllProducts);
 router.post("", postProduct);
