@@ -1,28 +1,41 @@
-//const { where } = require("sequelize/types")
-const { Product } = require("../../db")
+
+const { Product } = require("../../db");
 
 //post/ product to db
 const postProduct = async (req, res) => {
-
-    let { title, price, description, product_category, product_subCategory, product_care, image } = req.body
+    let {
+        title,
+        price,
+        description,
+        product_category,
+        product_subCategory,
+        product_care,
+        image,
+    } = req.body;
     try {
-        if (!title || !price || price < 0 || price.length > 100 ||
-            !description || !product_care || !product_category ||
-            !product_subCategory)
-            return res.send('missing or error parameters')
-        title = title.trim()
-        description = description.trim()
-        product_category = product_category.trim()
-        product_subCategory = product_subCategory.trim()
-        product_care = product_care.trim()
+        if (
+            !title ||
+            !price ||
+            price < 0 ||
+            price.length > 100 ||
+            !description ||
+            !product_care ||
+            !product_category ||
+            !product_subCategory
+        )
+            return res.send("missing or error parameters");
+        title = title.trim();
+        description = description.trim();
+        product_category = product_category.trim();
+        product_subCategory = product_subCategory.trim();
+        product_care = product_care.trim();
 
-        if (image.length === 0)
-            image = undefined
+        if (image.length === 0) image = undefined;
 
         let product = undefined;
-        const producto = await Product.findOne({ where: { title: title } })
-        console.log(producto)
-        if (producto) return res.send("product already exist")
+        const producto = await Product.findOne({ where: { title: title } });
+        console.log(producto);
+        if (producto) return res.send("product already exist");
         product = await Product.create({
             title,
             price,
@@ -31,15 +44,13 @@ const postProduct = async (req, res) => {
             product_subCategory,
             product_care,
             image,
-        })
-        return res.status(201).send(`product ${product.title} added to the DB`)
-
-    }
-    catch (e) {
+        });
+        return res.status(201).send(`product ${product.title} added to the DB`);
+    } catch (e) {
         console.log(e);
-        res.send('failed to created')
+        res.send("failed to created");
     }
-}
+};
 
 //get product By name
 const getProductByName = async (req, res, next) => {
@@ -48,76 +59,101 @@ const getProductByName = async (req, res, next) => {
         const Productx = await Product.findAll();
         const product = Productx.map((e) => e);
         //console.log(title)
-        let filter ="undefined"
-        if (title) filter = product.filter((e) => e.title.includes(title))
-        if (product_category) filter = product.filter((e) => e.product_category.includes(product_category));
-        if (product_subCategory) filter = product.filter((e) => e.product_subCategory.includes(product_subCategory));
+        let filter = "undefined";
+        if (title) filter = product.filter((e) => e.title.includes(title));
+        if (product_category)
+            filter = product.filter((e) =>
+                e.product_category.includes(product_category)
+            );
+        if (product_subCategory)
+            filter = product.filter((e) =>
+                e.product_subCategory.includes(product_subCategory)
+            );
 
         return res.status(200).json(filter);
-    }
-    catch (e) {
-        console.log(e);
+    } catch (e) {
+        console.log(next(e));
         res.status(500).send(e);
-
     }
-}
+};
 
 //get product By id
 const getProductById = async (req, res, next) => {
-    const { id } = req.params;
-    console.log(id)
-    const product = await Product.findOne({ where: { id: id } })
-    //console.log(product)
-    if (!product) return res.status(404).send("Product not found");
-    return res.status(200).json(product);
-}
+    try {
+        const { id } = req.params;
+        console.log(id);
+        const product = await Product.findOne({ where: { id: id } });
+        //console.log(product)
+        if (!product) return res.status(404).send("Product not found");
+        return res.status(200).json(product);
+    } catch (e) {
+        console.log(next(e));
+        res.status(500).send(e);
+    }
+};
 
 //get all from Product db
 const getDBproducts = async (req, res, next) => {
-    const dbProduct = await Product.findAll();
-    /* console.log (dbProduct.map(e=>{
-        return e.title }) ) */
-    const from_db = dbProduct.map(e => {
-        return {
-            id: e.id,
-            title: e.title,
-            price: e.price,
-            description: e.description,
-            product_category: e.product_category,
-            product_subCategory: e.product_subCategory,
-            product_care: e.product_care,
-            image: e.image,
-        }
-    })
-    // console.log(from_db)
-    return res.status(200).json(from_db)
-
-}
+    try {
+        const dbProduct = await Product.findAll();
+        const from_db = dbProduct.map((e) => {
+            return {
+                id: e.id,
+                title: e.title,
+                price: e.price,
+                description: e.description,
+                product_category: e.product_category,
+                product_subCategory: e.product_subCategory,
+                product_care: e.product_care,
+                image: e.image,
+            };
+        });
+        console.log(from_db)
+        return res.status(200).send(from_db);
+    }catch (err) {
+        console.log(next(err));
+        next(err);
+    }
+};
 
 //getDBproducts()
 ///put to fix Porducts_dataBase
 const putProduct = async (req, res) => {
-
-    let { id,title, price, description, product_category, product_subCategory, product_care, image } = req.body
+    let {
+        id,
+        title,
+        price,
+        description,
+        product_category,
+        product_subCategory,
+        product_care,
+        image,
+    } = req.body;
     try {
-        if (!title || !price || price < 0 || price.length > 100 ||
-            !description || !product_care || !product_category ||
-            !product_subCategory)
-            return res.send('missing or error parameters')
-        title = title.trim()
-        description = description.trim()
-        product_category = product_category.trim()
-        product_subCategory = product_subCategory.trim()
-        product_care = product_care.trim()
+        if (
+            !title ||
+            !price ||
+            price < 0 ||
+            price.length > 100 ||
+            !description ||
+            !product_care ||
+            !product_category ||
+            !product_subCategory
+        )
+            return res.send("missing or error parameters");
+        title = title.trim();
+        description = description.trim();
+        product_category = product_category.trim();
+        product_subCategory = product_subCategory.trim();
+        product_care = product_care.trim();
 
-        if (image.length === 0)
-            image = undefined
+        if (image.length === 0) image = undefined;
 
         let product = undefined;
-        const producto = await Product.findOne({ where: { id: id } })
+        const producto = await Product.findOne({ where: { id: id } });
         //console.log(producto)
 
-        if (!producto) return res.send("product No exist")
+        if (!producto) return res.send("product No exist");
         product = await producto.update({
             title,
             price,
@@ -126,16 +162,13 @@ const putProduct = async (req, res) => {
             product_subCategory,
             product_care,
             image,
-        })
-        return res.status(201).send(`product ${product.id} modified to the DB`)
-
-    }
-    catch (e) {
+        });
+        return res.status(201).send(`product ${product.id} modified to the DB`);
+    } catch (e) {
         console.log(e);
-        res.send('failed to created')
+        res.send("failed to created",next(e));
     }
-}
-
+};
 
 // post product to Shopping_cartdb related to user
 /* const Product_add_cart = async (req, res, next) => {
@@ -156,25 +189,40 @@ const putProduct = async (req, res) => {
             },
         }); */
 
-       /*  Product_Created.addUser(buyer);
-        // console.log(Product_Created)
-        res.status(201).send(`product ${Product_Created.title} added to the Shopping Cart`);
-    } catch (err) {
-        next(err);
-    }
+/*  Product_Created.addUser(buyer);
+ // console.log(Product_Created)
+ res.status(201).send(`product ${Product_Created.title} added to the Shopping Cart`);
+} catch (err) {
+ next(err);
+}
 }; */
 //put product to carrydb (fix on carrydb)
 const Product_fix_carry = async (req, res, next) => {
     try {
         const {
-            user_id, title, price, description, product_category, product_subCategory
+            user_id,
+            title,
+            price,
+            description,
+            product_category,
+            product_subCategory,
         } = req.body;
 
-        if (!title || !price || !description || !product_category || !product_subCategory) {
+        if (
+            !title ||
+            !price ||
+            !description ||
+            !product_category ||
+            !product_subCategory
+        ) {
             return res.status(400).send("missing Correct parameters");
         }
-        const Product_Created = await Carry.put({
-            title, price, description, product_category, product_subCategory
+        const Product_Created = await Carry.update({
+            title,
+            price,
+            description,
+            product_category,
+            product_subCategory,
         });
         const buyer = await User.findOne({
             where: {
@@ -184,7 +232,9 @@ const Product_fix_carry = async (req, res, next) => {
 
         Product_Created.addUser(buyer);
         // console.log(Product_Created)
-        res.status(201).send(`product ${Product_Created.title} added to the Shopping Cart`);
+        res
+            .status(201)
+            .send(`product ${Product_Created.title} added to the Shopping Cart`);
     } catch (err) {
         next(err);
     }
@@ -197,15 +247,22 @@ const deleteProduct = async (req, res, next) => {
         const { id } = req.params;
         if (id.length > 0) {
             await Product.destroy({
-                where: { id: id }
+                where: { id: id },
             });
-            return res.status(200).send(`Product of id: ${id} has been deleted`)
-        };
+            return res.status(200).send(`Product of id: ${id} has been deleted`);
+        }
         return res.status(400).send("there is no Product with that id");
     } catch (err) {
         next(err);
     }
 };
 
-
-module.exports = { postProduct, getProductByName, getProductById, getDBproducts,/*  Product_add_cart, */ Product_fix_carry, deleteProduct,putProduct }
+module.exports = {
+    postProduct,
+    getProductByName,
+    getProductById,
+    getDBproducts,
+  /*  Product_add_cart, */ Product_fix_carry,
+    deleteProduct,
+    putProduct,
+};
