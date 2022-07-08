@@ -1,0 +1,13 @@
+const { DataTypes } = require("sequelize");
+
+module.exports = (sequelize) => {
+  sequelize.define(
+    "ShoppingList",
+    {
+items: {
+    type: DataTypes.ARRAY(DataTypes.STRING), //array de objetos
+    allowNull: false,
+  },
+
+    })
+}
