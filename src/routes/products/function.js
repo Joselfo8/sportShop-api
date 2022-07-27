@@ -289,7 +289,7 @@ const putProduct = async (req, res) => {
       title = title.trim();
       const productExists = await Product.findOne({ where: { title: title } });
 
-      if (productExists)
+      if (productExists && productExists.id !== id)
         return res
           .status(400)
           .send({ msg: "product with this title already exist" });
