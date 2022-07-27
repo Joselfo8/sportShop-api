@@ -133,19 +133,34 @@ async function postBuy(req, res) {
 
       //console.log("newStock :", newStock);
 
+
+    for (const producto of products) {
+      producto.buys += 1;
+      await producto.save();
+    }
+
+    products = products.map((x) => {
+      let quantity = Object.values(list[x.id]);
+      quantity = quantity.reduce((a, b) => a + parseInt(b), 0);
+
+
       return {
         id: x.id,
         title: x.title,
         price: x.price,
         image: x.image,
         sizesAmount: list[x.id],
+        quantity: quantity,
       };
     });
 
-    const suma = products.reduce((acc, cur) => acc + cur.price, 0);
+    const suma = products.reduce(
+      (acc, cur) => acc + cur.price * cur.quantity,
+      0
+    );
 
     let buy = await Buy.create({
-      status_history: [{ status: "create order", date: new Date() }],
+      status_history: [{ status: "created order", date: new Date() }],
       products: [...products],
       sub_total: suma,
       taxes: suma * 0.026,
