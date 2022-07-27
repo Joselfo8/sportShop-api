@@ -15,24 +15,44 @@ const {
 } = require("./function");
 
 //get categories
-router.get("/category", getCategory);
+router.get(
+  "/category",
+  checkRole,
+  checkRules(["admin", "user", "guest"]),
+  getCategory
+);
 //get/products
-router.get("/getall", getProducts);
+router.get(
+  "/getall",
+  checkRole,
+  checkRules(["admin", "user", "guest"]),
+  getProducts
+);
 //get/products?name&category&subCategory
-router.get("", getProductByName);
+router.get(
+  "",
+  checkRole,
+  checkRules(["admin", "user", "guest"]),
+  getProductByName
+);
 
 //get/products/:id
-router.get("/:id", getProductById);
+router.get(
+  "/:id",
+  checkRole,
+  checkRules(["admin", "user", "guest"]),
+  getProductById
+);
 
 //put/products body:id,name,price,description,product_category,product_subCategory
-router.put("/", putProduct);
+router.put("/", checkRole, checkRules(["admin"]), putProduct);
 
 //postAllatOnce/products/all
-router.post("/all", bulk);
+router.post("/all", checkRole, checkRules(["admin"]), bulk);
 //post/products body:name,price,description,product_category,product_subCategory
-router.post("", postProduct);
+router.post("", checkRole, checkRules(["admin"]), postProduct);
 
 //delete/products/:id
-router.delete("/:id", deleteProduct);
+router.delete("/:id", checkRole, checkRules(["admin"]), deleteProduct);
 
 module.exports = { products: router };

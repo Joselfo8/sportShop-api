@@ -1,22 +1,20 @@
 const { User, Product } = require("../../db");
 
-
 const get_item = async (req, res) => {
   try {
-    let { id } = req.params;
+    let { id } = req.user;
     //validaciones
     id = parseInt(id);
     if (!id) return res.send({ msg: "user is required" });
     if (Number.isNaN(id)) return res.send({ msg: "user must be a number" });
-   
-    if (req.user.id !== id && req.user.role === "user"){
-      return res.send({ msg: "you don't have access to this resource" });
-    }
 
     //existencia de usuario
     const user = await User.findOne({ where: { id } });
-    if (!user) return res.send({ msg: "user not found" });
+    if (!user) return res.status(404).send({ msg: "user not found" });
 
+    if (user.id !== id && req.user.role !== "admin") {
+      return res.send({ msg: "you don't have access to this resource" });
+    }
     let itemsId = Object.keys(user.trolly);
 
     let items = await Product.findAll({
@@ -46,36 +44,41 @@ const get_item = async (req, res) => {
 const delete_item = async (req, res) => {
   try {
     const { product } = req.query;
-    const { user } = req.query;
+    const user = req.user.id;
+
 
     //validaciones de user
-    if (!user) return res.send({ msg: "user is required" });
-    if (Number.isNaN(user)) return res.send({ msg: "user must be a number" });
-    
-    if(req.user.id !== user && req.user.role === "user"){
-      return res.send({ msg: "you don't have access to this resource" });
+    if (!user) return res.status(400).send({ msg: "user is required" });
+    if (Number.isNaN(user))
+      return res.status(400).send({ msg: "user must be a number" });
+
+    if (req.user.id !== user && req.user.role === "user") {
+      return res
+        .status(400)
+        .send({ msg: "you don't have access to this resource" });
     }
-    
+
+
     //validaciones de product
-    if (!product) return res.send({ msg: "product is required" });
+    if (!product) return res.status(400).send({ msg: "product is required" });
     if (Number.isNaN(product))
-      return res.send({ msg: "product must be a number" });
+      return res.status(400).send({ msg: "product must be a number" });
 
     //existencia de usuario
     let userObj = await User.findOne({ where: { id: user } });
-    if (!userObj) return res.send({ msg: "user not found" });
+    if (!userObj) return res.status(404).send({ msg: "user not found" });
 
     //existencia de producto
     let productObj = await Product.findOne({ where: { id: product } });
-    if (!productObj) return res.send({ msg: "product not found" });
+    if (!productObj) return res.status(404).send({ msg: "product not found" });
 
     userObj.trolly = { ...userObj.trolly, [productObj.id]: undefined };
     await userObj.save();
 
-    res.send({ msg: "item deleted", list: userObj.trolly });
+    res.status(200).send({ msg: "item deleted", list: userObj.trolly });
   } catch (e) {
     console.log(e);
-    res.send({ msg: "failed to delete item", error: e });
+    res.status(500).send({ msg: "failed to delete item", error: e });
   }
 };
 
@@ -84,7 +87,7 @@ const empty_trolly = async (req, res) => {
     let { user } = req.query;
     user = parseInt(user);
 
-if (req.user.id !== user && req.user.role === "user"){
+    if (req.user.id !== user && req.user.role === "user") {
       return res.send({ msg: "you don't have access to this resource" });
     }
 
@@ -103,37 +106,39 @@ if (req.user.id !== user && req.user.role === "user"){
 //////////////////////////////////////////
 const add_item = async (req, res) => {
   try {
-    let { user, size, quantity, product } = req.body;
-
-    if (req.user.id !== user && req.user.role === "user"){
-      return res.send({ msg: "you don't have access to this resource" });
+    let { /* user, */ size, quantity, product } = req.body;
+    let user = req.user.id;
+    if (req.user.id !== user && req.user.role === "user") {
+      return res
+        .status(400)
+        .send({ msg: "you don't have access to this resource" });
     }
 
     //validaciones de user
-    if (!user) return res.send({ msg: "user is required" });
+    if (!user) return res.status(400).send({ msg: "user is required" });
     if (Number.isNaN(user)) return res.send({ msg: "user must be a number" });
 
     //validaciones de product
-    if (!product) return res.send({ msg: "product is required" });
+    if (!product) return res.status(400).send({ msg: "product is required" });
     if (Number.isNaN(product))
-      return res.send({ msg: "product must be a number" });
+      return res.status(400).send({ msg: "product must be a number" });
 
     //validaciones de size
-    if (!size) return res.send({ msg: "size is required" });
+    if (!size) return res.status(400).send({ msg: "size is required" });
     size = size.toUpperCase();
 
     //validaciones de quantity
-    if (!quantity) return res.send({ msg: "quantity is required" });
+    if (!quantity) return res.status(400).send({ msg: "quantity is required" });
     if (Number.isNaN(quantity))
-      return res.send({ msg: "quantity must be a number" });
+      return res.status(400).send({ msg: "quantity must be a number" });
 
     //existencia de usuario
     const userObj = await User.findOne({ where: { id: user } });
-    if (!userObj) return res.send({ msg: "user not found" });
+    if (!userObj) return res.status(404).send({ msg: "user not found" });
 
     //existencia de producto
     const item_to_add = await Product.findOne({ where: { id: product } });
-    if (!item_to_add) return res.send({ msg: "product not found" });
+    if (!item_to_add) return res.status(404).send({ msg: "product not found" });
 
     let propetyItem = userObj.trolly[item_to_add.id];
     propetyItem = { ...propetyItem, [size]: quantity };
@@ -141,9 +146,9 @@ const add_item = async (req, res) => {
     userObj.trolly = { ...userObj.trolly, [item_to_add.id]: propetyItem };
 
     await userObj.save();
-    res.send({ msg: "item added", list: userObj.trolly });
+    res.status(201).send({ msg: "item added", list: userObj.trolly });
   } catch (err) {
-    res.send({ msg: "failed to add item", error: err });
+    res.status(500).send({ msg: "failed to add item", error: err });
     console.log(err);
   }
 };

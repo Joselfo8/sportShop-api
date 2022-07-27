@@ -27,7 +27,6 @@ const verifyToken = async (token) => {
   }
 };
 
-
 const checkRules = (roles) => async (req, res, next) => {
   try {
     if (req.user.id === 0) {
@@ -38,16 +37,19 @@ const checkRules = (roles) => async (req, res, next) => {
       }
     } else {
       const user = await User.findByPk(req.user.id);
-      if (!user) return res.status(401).send({ msg: "user is not in data base" });
+      if (!user)
+        return res.status(401).send({ msg: "user is not in data base" });
 
       if (roles.includes(user.role)) {
         return next();
       } else {
-        return res.status(409).send({ msg: "have not access to this resource" });
+        return res
+          .status(401)
+          .send({ msg: "have not access to this resource" });
       }
     }
   } catch (e) {
-    return res.status(409).send({ msg: "it's way is block" }); //por aqui no pasa
+    return res.status(500).send({ msg: "it's way is block" }); //por aqui no pasa
   }
 };
 

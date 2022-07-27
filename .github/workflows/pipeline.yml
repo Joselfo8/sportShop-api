@@ -25,8 +25,8 @@ jobs:
           node-version: 16
       - name: install-dependencies
         run: npm install --no-audit --no-fund
-      # - name: run test
-      #   run: npm test
+      - name: run test
+        run: npm test
       - name: deploy to heroku
         if: ${{github.event_name == 'push'}}
         uses: akhileshns/heroku-deploy@v3.12.12

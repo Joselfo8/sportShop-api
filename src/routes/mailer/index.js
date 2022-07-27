@@ -147,6 +147,20 @@ router.post("/send-email", (req, res) => {
       console.log("Server is ready to take our messages");
     }
   });
-});
+
+
+router.post('/pay', async (req, res) => {
+  try{
+      const { id, jsonSoldProducts, amount  } = req.body
+      //console.log(id)
+      //res.send('ok')
+      
+  }
+  catch(err){
+      console.log(err)
+  }
+})
+
+
 
 module.exports = { mailer: router };

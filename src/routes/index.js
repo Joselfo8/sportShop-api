@@ -14,7 +14,9 @@ const { buys } = require("./buys");
 
 const { pay } = require("./pay");
 
-const { mailer } = require("./mailer");
+//const { mailer } = require("./mailer");
+
+const { stripes } = require("./stripes");
 
 const router = Router();
 
@@ -22,15 +24,17 @@ const router = Router();
 router.get("/health", (req, res) => {
   res.send("ok");
 });
-////// google auth 
+////// google auth
 
-const CLIENT_URL = "https://sport-shop-client.vercel.app/"//"https://sport-shop-client.vercel.app/"//"http://localhost:4040/";
+const CLIENT_URL = "https://sport-shop-client.vercel.app/"; //"https://sport-shop-client.vercel.app/"//"http://localhost:4040/";
 const { tokenSign } = require("../helpers/Token");
 require("../db.js");
 require("../midleware.js");
 const { User } = require("../db");
 
-router.use('/google', passport.authenticate('google', { scope: ['profile', 'email'] }),
+router.use(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] }),
   async (req, res) => {
     // res.send("<h1>ok</h1>");
     if (!req.user) {
@@ -38,28 +42,30 @@ router.use('/google', passport.authenticate('google', { scope: ['profile', 'emai
     } else {
       const user_e = req.user._json.email;
       const user = await User.findOne({ where: { email: user_e } });
-      const token = await tokenSign(user)
-      if (!user) { res.status(200).json({ 
-        msg: "We invite you to register with us, to be able to make purchases",
-        success: fail,
-        user_Email: req.user._json.email,
-        token: token,
-        role:"ghost",
-       }); }
-      else {
+      const token = await tokenSign(user);
+      if (!user) {
+        res.status(200).json({
+          msg: "We invite you to register with us, to be able to make purchases",
+          success: fail,
+          user_Email: req.user._json.email,
+          token: token,
+          role: "ghost",
+        });
+      } else {
         //genero token a usuario.id
-         res.status(200).json({
+        res.status(200).json({
           messege: `Welcome! ${user.name} ${user.lastname}`,
           success: true,
           user_Email: req.user._json.email,
           token: token,
           role: user.role,
-        })
+        });
       }
     }
     //redirect('https://sport-shop-client.vercel.app/');
     //console.log(req.user);
-  });
+  }
+);
 
 // logout de google
 
@@ -69,8 +75,7 @@ router.use('/google', passport.authenticate('google', { scope: ['profile', 'emai
   })
   //res.send("<h1>logout</h1>");
   res.redirect(CLIENT_URL);
-}); */ 
-
+}); */
 
 // Configurar los routers
 
@@ -82,6 +87,12 @@ router.use("/auth", auth);
 router.use("/buys", buys);
 router.use("/stock", stock);
 router.use("/pay", pay);
-router.use("/mailer", mailer);
+
+/////router.use("/mailer", mailer);
+
+router.use("/stripes", stripes);
+
+
+
 
 module.exports = router;

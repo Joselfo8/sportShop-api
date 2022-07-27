@@ -6,7 +6,7 @@
   "scripts": {
     "start": "cross-env NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development nodemon -L",
-    "test": "cross-env NODE_ENV=production jest  --forceExit",
+    "test": "cross-env NODE_ENV=production jest  --forceExit --silent ",
     "test:dev": "cross-env NODE_ENV=development jest  --forceExit"
   },
   "author": "Henry FT25B-G4",
@@ -16,6 +16,7 @@
     "npm": ">=6.14.6"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^1.32.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "cloudinary": "^1.30.0",

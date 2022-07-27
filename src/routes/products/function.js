@@ -109,7 +109,8 @@ const postProduct = async (req, res) => {
     if (image && image.slice(0, 4) !== "http") {
       image = atob(image);
       await cloudinary.uploader.upload(image, async (err, result) => {
-        if (err) return res.send({ msg: "image is invalid(Cloudinary)" });
+        if (err)
+          return res.status(500).send({ msg: "image is invalid(Cloudinary)" });
         image = result.url;
       });
     }
@@ -145,7 +146,7 @@ const postProduct = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    return res.send({ msg: "failed to create product", err: err });
+    return res.status(500).send({ msg: "failed to create product", err: err });
   }
 };
 
@@ -277,19 +278,21 @@ const putProduct = async (req, res) => {
   try {
     //validaciones a todos los campos
 
-    if (!id) return res.send({ msg: "id is required" });
+    if (!id) return res.status(400).send({ msg: "id is required" });
     if (Number.isNaN(parseInt(id)))
-      return res.send({ msg: "id must be a number" });
+      return res.status(400).send({ msg: "id must be a number" });
 
     const producto = await Product.findOne({ where: { id: id } });
-    if (!producto) return res.send({ msg: "product not found" });
+    if (!producto) return res.status(404).send({ msg: "product not found" });
 
     if (title) {
       title = title.trim();
       const productExists = await Product.findOne({ where: { title: title } });
 
       if (productExists)
-        return res.send({ mdg: "product with this title already exist" });
+        return res
+          .status(400)
+          .send({ msg: "product with this title already exist" });
 
       producto.title = title;
     }
@@ -319,7 +322,7 @@ const putProduct = async (req, res) => {
     }
     producto.save();
 
-    return res.status(201).send({
+    return res.status(200).send({
       msg: `product ${producto.id} modified to the DB`,
       product: {
         id: producto.id,
@@ -333,19 +336,8 @@ const putProduct = async (req, res) => {
       },
     });
   } catch (err) {
-    /* catch (e) {
-    console.log(e);
-
-    res.send({ msg: "failed to modified" });
-  } */
-    if (err.name === "SequelizeValidationError") {
-      return res.status(400).json({
-        success: false,
-        msg: err.errors.map((e) => e.message),
-      });
-    } else {
-      next(new ErrorResponse(`Sorry, could not save ${req.body.name}`, 404));
-    }
+    console.log("err => ", err);
+    res.status(500).send({ msg: "failed to modified", err: err });
   }
 };
 
