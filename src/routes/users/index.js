@@ -6,6 +6,8 @@ const {
   postUser,
   deleteUser,
   putUser,
+  updateAvatar,
+  deleteAvatar,
   loginUser,
   getAllUser,
   logOut,
@@ -19,12 +21,7 @@ const { checkRules } = require("../../helpers/Token");
 
 
 //funciones globales
-router.post(
-  "/login",
-  checkRole,
-  checkRules(["user", "admin", "guest"]),
-  loginUser
-);
+router.post("/login", loginUser);
 
 router.get(
   "/isAdmin",
@@ -38,12 +35,17 @@ router.get("/all", checkRole, checkRules(["admin"]), getAllUser);
 
 // get user data with id from token
 router.get("", checkRole, checkRules(["user", "admin"]), getUserData);
+// get user data with param id if role is admin
 router.get("/:id", checkRole, checkRules(["admin"]), getUserData);
 // update self-user data
 router.put("", checkRole, checkRules(["user", "admin"]), putUser);
+// update user data with param id if role is admin
 router.put("/:id", checkRole, checkRules(["admin"]), putUser);
+// update user image (avatar)
+router.put("/avatar", checkRole, checkRules(["user", "admin"]), updateAvatar);
+// delete user image (avatar)
+router.delete("/avatar", checkRole, checkRules(["user", "admin"]), deleteAvatar);
 // delete user
-router.delete("", checkRole, checkRules(["user", "admin"]), deleteUser);
 router.delete("/:id", checkRole, checkRules(["admin"]), deleteUser);
 
 // create a new user
@@ -67,7 +69,5 @@ router.delete(
   checkRules(["user", "admin"]),
   deleteShippingAddress
 );
-router.get("", checkRole, checkRules(["admin"]), getAllUser);
-
 
 module.exports = { users: router };

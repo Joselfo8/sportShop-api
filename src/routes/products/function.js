@@ -254,6 +254,7 @@ const getProductById = async (req, res, next) => {
         product_care: product.product_care,
         image: product.image,
         stock: product.stock,
+        buys: product.buys,
       },
     });
   } catch (error) {
@@ -289,7 +290,7 @@ const putProduct = async (req, res) => {
       title = title.trim();
       const productExists = await Product.findOne({ where: { title: title } });
 
-      if (productExists)
+      if (productExists && productExists.id !== id)
         return res
           .status(400)
           .send({ msg: "product with this title already exist" });

@@ -4,6 +4,9 @@ module.exports = (sequelize) => {
   sequelize.define(
     "user",
     {
+      avatar: {
+        type: DataTypes.JSONB
+      },
       role: {
         type: DataTypes.STRING, //DataTypes.ENUM('user', 'admin'),//,
         allowNull: false,

@@ -143,9 +143,15 @@ describe("login", () => {
 
 describe("get users", () => {
   it("should get a user with user", async () => {
-    const response = await api
-      .get("/users")
-      .set("Authorization", "Bearer " + tokenUser);
+    let response;
+    try {
+      response = await api
+        .get("/users")
+        .set("Authorization", "Bearer " + tokenUser);
+    } catch (err) {
+      console.log(err);
+    }
+
     expect(response.status).toBe(200);
     expect(response.body.data.name).toBe(userData.name);
     userData.id = response.body.data.id;
@@ -223,19 +229,33 @@ describe("update users", () => {
   });
 
   it("should update role to admin with admin", async () => {
-    const response = await api
-      .put("/users/" + userData.id)
-      .set("Authorization", "Bearer " + tokenAdmin)
-      .send({ role: "admin" });
+    let response;
+
+    try {
+      response = await api
+        .put("/users/" + userData.id)
+        .set("Authorization", "Bearer " + tokenAdmin)
+        .send({ role: "admin" });
+    } catch (err) {
+      console.log(err);
+    }
+
     expect(response.status).toBe(200);
     expect(response.body.data.role).toBe("admin");
   });
 
   it("should update role to user with admin", async () => {
-    const response = await api
-      .put("/users/" + userData.id)
-      .set("Authorization", "Bearer " + tokenAdmin)
-      .send({ role: "user" });
+    let response;
+
+    try {
+      response = await api
+        .put("/users/" + userData.id)
+        .set("Authorization", "Bearer " + tokenAdmin)
+        .send({ role: "user" });
+    } catch (err) {
+      console.log(err);
+    }
+
     expect(response.status).toBe(200);
     expect(response.body.data.role).toBe("user");
   });

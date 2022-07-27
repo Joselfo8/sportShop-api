@@ -111,6 +111,10 @@ module.exports = (sequelize) => {
       brand: {
         type: DataTypes.STRING,
       },
+      buys: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+      },
       stock: {
         type: DataTypes.JSONB,
         defaultValue: {},

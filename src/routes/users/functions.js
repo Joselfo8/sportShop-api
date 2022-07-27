@@ -1,5 +1,6 @@
 const { User, ShippingAddress } = require("../../db");
-
+const cloudinary = require("cloudinary").v2;
+const { Op } = require("sequelize");
 const { compare, encrypt } = require("../../helpers/handleBcrypt");
 const { tokenSign, verifyToken } = require("../../helpers/Token");
 
@@ -88,8 +89,9 @@ async function getUser(req, res) {
 }
 
 async function getUserData(req, res) {
-  let { id } = req.params; //solo token de admin permite enviar params
-  if (!id) id = req.user.id;
+  // solo token de admin permite enviar params
+  const id =
+    req.params.id && req.user.role === "admin" ? req.params.id : req.user.id;
 
   if (!id) return res.status(400).json({ msg: "ID is required" });
 
@@ -104,14 +106,89 @@ async function getUserData(req, res) {
         "genre",
         "dateOfBirth",
         "trolly",
+        "avatar",
       ],
       include: "shippingAddresses",
     });
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    return res.status(200).json({ msg: "User found", data: user });
+    return res.status(200).json({
+      msg: "User found",
+      data: { ...user.get(), avatar: user.avatar?.url || null },
+    });
   } catch (error) {
-    return res.send(error);
+    return res.status(500).json({ msg: error.message });
+  }
+}
+
+// update user image
+async function updateAvatar(req, res) {
+  const { id } = req.user;
+  if (!id) return res.status(400).json({ msg: "ID is required" });
+  const { avatar } = req.body;
+
+  try {
+    const user = await User.findOne({
+      where: { id },
+      attributes: ["id", "avatar"],
+    });
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    // if user have a avatar already uploaded, delete and replace
+    if (user.avatar.publicId)
+      await cloudinary.uploader.destroy(user.avatar.publicId);
+
+    // save avatar
+    const response = await cloudinary.uploader.upload(avatar);
+    user.set({
+      avatar: {
+        publicId: response["public_id"],
+        url: response["secure_url"],
+      },
+    });
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ msg: "User avatar saved", data: user.avatar.url });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: error.message });
+  }
+}
+
+// delete user image
+async function deleteAvatar(req, res) {
+  const { id } = req.user;
+  if (!id) return res.status(400).json({ msg: "ID is required" });
+
+  try {
+    const user = await User.findOne({
+      where: { id },
+      attributes: ["id", "avatar"],
+    });
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    if (!user.avatar.publicId)
+      return res.status(400).json({ msg: "User don't have an avatar" });
+
+    // delete user from cloudinary
+    await cloudinary.uploader.destroy(user.avatar.publicId);
+
+    // delete url from db
+    user.set({
+      avatar: {
+        publicId: null,
+        url: null,
+      },
+    });
+    await user.save();
+
+    return res.status(200).json({ msg: "User avatar deleted" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ msg: "Delete avatar failed", err: error.message });
   }
 }
 
@@ -178,23 +255,14 @@ async function deleteUser(req, res) {
 }
 //PUT
 async function putUser(req, res) {
+  // solo token de admin permite enviar params
+  const id =
+    req.params.id && req.user.role === "admin" ? req.params.id : req.user.id;
+  if (!id) return res.status(400).json({ msg: "id is required" });
+
+  const { password, role } = req.body;
 
   try {
-    let { id } = req.params; //solo token de admin permite enviar params
-    if (!id) id = req.user.id;
-    const { password, email, role, name, lastname, genre, dateOfBirth } =
-      req.body;
-
-    //validate id
-    if (!id) {
-      return res.send({ msg: "id is required" });
-    }
-    if (Number.isNaN(parseInt(id))) {
-      return res.send({ msg: "id isn´t number" });
-    }
-    id = parseInt(id);
-
-
     // get user by id
     const user = await User.findOne({
       where: { id },
@@ -203,7 +271,7 @@ async function putUser(req, res) {
     if (!user) return res.status(404).json({ msg: "User not found" });
 
     // check if user have authorization
-    if (role !== "admin" && id !== user.id) {
+    if (req.user.role !== "admin" && id !== user.id) {
       return res.status(403).json({ msg: "You can´t update other users" });
     }
 
@@ -212,18 +280,17 @@ async function putUser(req, res) {
       user.password = await encrypt(password);
     }
 
-
-    //only admin can update role
+    // only admin can update role
     if (role && req.user.role !== "admin") {
       return res.status(401).json({ msg: "Only admin can update role" });
-
     }
 
     // save all changes
     user.set(req.body);
+    await user.save();
 
     // send all values, less password
-    const { password: _1, ...response } = user.dataValues;
+    const { password: _1, ...response } = user.get();
 
     return res.status(200).json({
       msg: "User updated",
@@ -420,6 +487,8 @@ module.exports = {
   postUser,
   deleteUser,
   putUser,
+  updateAvatar,
+  deleteAvatar,
   loginUser,
   getAllUser,
   logOut,

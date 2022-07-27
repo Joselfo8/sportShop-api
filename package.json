@@ -6,7 +6,7 @@
   "scripts": {
     "start": "cross-env NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development nodemon -L",
-    "test": "cross-env NODE_ENV=production jest  --forceExit --silent ",
+    "test": "cross-env NODE_ENV=production jest  --forceExit",
     "test:dev": "cross-env NODE_ENV=development jest  --forceExit"
   },
   "author": "Henry FT25B-G4",

@@ -6,7 +6,6 @@ const e = require("express");
 async function getBuys(req, res) {
   const { name, status, pag = 1, limit = 4 } = req.query;
   try {
-
     let buys = await Buy.findAll({
       include: [User],
       order: [["id", "ASC"]],
@@ -37,7 +36,6 @@ async function getBuys(req, res) {
       ...buys,
       products: undefined,
       buys: buys.products,
-
     });
   } catch (error) {
     //console.log("error=>", error);
@@ -60,7 +58,6 @@ async function getBuyById(req, res) {
     }
 
     res.send(buyObj);
-
   } catch (error) {
     //console.log("error ==> ", error);
     res.status(500).json({ msg: "failed to get buys", error });
@@ -104,10 +101,6 @@ async function postBuy(req, res) {
       return res.send({ msg: "id_user is not a number" });
     id_user = Number(id_user);
 
-    //validation authorization
-    if (req.user.role === "user" && req.user.id !== id_user)
-      return res.send({ msg: "you can´t buy for other users" });
-
     const user = await User.findOne({ where: { id: id_user } });
     if (!user) return res.send({ msg: "user not found" });
 
@@ -115,13 +108,9 @@ async function postBuy(req, res) {
     console.log("LISTA: ",list)
     let products = Object.keys(list);
     products = await Product.findAll({ where: { id: products } });
-    if (products.length === 0) return res.send({ msg: "list is empty" });
-  
-   /*  products.forEach((e) => {
 
-      //e.stock = e.stock - list[e.id];
-      await e.save();
-    }); */
+    if (products.length === 0) return res.send({ msg: "list is empty" });
+ 
    // console.log("prouct_after= ", products)
     // create buy
     products = products.map(async(x) => {
@@ -143,6 +132,7 @@ async function postBuy(req, res) {
       console.log("cosas :" ,x.stock)
 
       //console.log("newStock :", newStock);
+
       return {
         id: x.id,
         title: x.title,

@@ -11,9 +11,8 @@ const passport = require('passport'); //  passport
 //const cookieSession = require("cookie-session");
 //
 const server = express()
-//
-server.use(express.json()); // para que pueda leer el body
-server.use(express.urlencoded({ extended: true })); // para que pueda leer el body de formularios
+// server.use(express.json()); // para que pueda leer el body
+// server.use(express.urlencoded({ extended: true })); // para que pueda leer el body de formularios
 server.use(session({ // para que pueda leer la sesion  de usuario en el navegador
     secret: "secret",
     resave: false, 
