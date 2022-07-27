@@ -67,18 +67,6 @@ router.use(
   }
 );
 
-// logout de google
-
-/*  router.use('/logout', function (req, res) {
-  req.logout(function (err) {
-    if (err) { return next(err); }
-  })
-  //res.send("<h1>logout</h1>");
-  res.redirect(CLIENT_URL);
-}); */
-
-// Configurar los routers
-
 router.use("/users", users);
 router.use("/products", products);
 router.use("/shopping_list", shopping_list);

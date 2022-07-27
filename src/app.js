@@ -4,33 +4,15 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const routes = require("./routes/index.js");
 const session = require("express-session");
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 // GOOGLE AUTH
 require("./midleware.js"); // midleware
-const passport = require('passport'); //  passport
-//const cookieSession = require("cookie-session");
-//
-const server = express()
-// server.use(express.json()); // para que pueda leer el body
-// server.use(express.urlencoded({ extended: true })); // para que pueda leer el body de formularios
-server.use(session({ // para que pueda leer la sesion  de usuario en el navegador
-    secret: "secret",
-    resave: false, 
-    saveUninitialized: false,
-}));
 
-/* server.use(
-  cookieSession({ name: "session", keys: ["keysconstrasena"], maxAge: 2 * 60 * 60 * 10 })
-);  */
-server.use(passport.initialize()); 
-//server.use(passport.session());
-//server.use("/auth", authRoute);
-//
-
-
+const server = express();
+server.use(express.json()); // para que pueda leer el body
+server.use(express.urlencoded({ extended: true })); // para que pueda leer el body de formularios
 
 require("./db.js");
-
 
 server.name = "API";
 

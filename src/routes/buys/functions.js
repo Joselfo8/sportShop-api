@@ -8,7 +8,7 @@ async function getBuys(req, res) {
   try {
     let buys = await Buy.findAll({
       include: [User],
-      order: [["id", "ASC"]],
+      order: [["id", "DESC"]],
     });
 
     buys = buys.map((x) => {
@@ -85,54 +85,76 @@ async function getBuysByIdUser(req, res) {
 async function postBuy(req, res) {
   try {
     let { method, receiver, direction, city, state, country } = req.body;
+
     let id_user = req.user.id;
 
     //validaciones
-    if (!method) return res.send({ msg: "please, method is required" });
-    if (!receiver) return res.send({ msg: "please, receiver is required" });
-    if (!direction) return res.send({ msg: "please, direction is required" });
-    if (!city) return res.send({ msg: "please, city is required" });
-    if (!state) return res.send({ msg: "please, state is required" });
-    if (!country) return res.send({ msg: "please, country is required" });
+    if (!method)
+      return res.status(400).send({ msg: "please, method is required" });
+    if (!receiver)
+      return res.status(400).send({ msg: "please, receiver is required" });
+    if (!direction)
+      return res.status(400).send({ msg: "please, direction is required" });
+    if (!city) return res.status(400).send({ msg: "please, city is required" });
+    if (!state)
+      return res.status(400).send({ msg: "please, state is required" });
+    if (!country)
+      return res.status(400).send({ msg: "please, country is required" });
 
     //validaciones de id
-    if (!id_user) return res.send({ msg: "please, id_user is required" });
+    if (!id_user)
+      return res.status(400).send({ msg: "please, id_user is required" });
     if (Number.isNaN(Number(id_user)))
-      return res.send({ msg: "id_user is not a number" });
+      return res.status(400).send({ msg: "id_user is not a number" });
     id_user = Number(id_user);
 
     const user = await User.findOne({ where: { id: id_user } });
-    if (!user) return res.send({ msg: "user not found" });
+    if (!user) return res.status(404).send({ msg: "user not found" });
 
+    //get the list for shopping
     const list = user.trolly;
-    console.log("LISTA: ",list)
+
+    //get the object for the buy
     let products = Object.keys(list);
     products = await Product.findAll({ where: { id: products } });
 
-    if (products.length === 0) return res.send({ msg: "list is empty" });
+    if (products.length === 0)
+      return res.status(202).send({ msg: "list is empty" });
 
-for (const producto of products) {
-  producto.buys += 1;
-  await producto.save();
-}
-let error = false;
-    products = products.map(async(x) => {
+    //add the buy to products
+    for (const product of products) {
+      product.buys += 1;
+      await product.save();
+    }
+    //create boolean for the error
+    let error = false;
+
+    //map for the buy
+    products = products.map((x) => {
+      //get the quantity for the product
       let quantity = Object.values(list[x.id]);
       quantity = quantity.reduce((a, b) => a + parseInt(b), 0);
-      const newStock = list[x.id]
-      let sizes = Object.keys(newStock)
-      //console.log(x.id)
-      sizes.map((e)=>{
-        //console.log(newStock[e], e)
-        //console.log(x.stock[e])
-        //console.log(newStock[e])
-        x.stock[e] = x.stock[e] - newStock[e]
-        if (x.stock[e] < 0){  x.stock[e] = 0 ;
-        return error = true;}
-      })
-      await Product.update({stock : x.stock},{where : {id : x.id}} )
-      console.log("cosas :" ,x.stock)
-      //console.log("newStock :", newStock);
+
+      //get sizes and quantity for the product
+      const newStock = list[x.id];
+      let sizes = Object.keys(newStock);
+
+      //por cada talla modificar el stock
+      sizes.forEach((e) => {
+        //si el stock es menor que la cantidad que se quiere comprar sale un error
+        if (x.stock[e] - newStock[e] < 0) {
+          return (error = true);
+        }
+        x.stock[e] = x.stock[e] - newStock[e];
+      });
+
+      //si el stock es menor que la cantidad que se quiere comprar sale un error
+      if (error) return;
+
+      //actualizar el stock
+      Product.update({ stock: x.stock }, { where: { id: x.id } });
+
+      //crear el objeto para el buy
       return {
         id: x.id,
         title: x.title,
@@ -142,12 +164,16 @@ let error = false;
         quantity: quantity,
       };
     });
-if (error) return res.send({ msg: "not enough stock" });
+    //retorna el error si existe
+    if (error) return res.send({ msg: "not enough stock" });
+
+    //suma todos los precios
     const suma = products.reduce(
       (acc, cur) => acc + cur.price * cur.quantity,
       0
     );
 
+    //crear el buy
     let buy = await Buy.create({
       status_history: [{ status: "created order", date: new Date() }],
       products: [...products],
@@ -162,7 +188,7 @@ if (error) return res.send({ msg: "not enough stock" });
     });
     await user.addBuy(buy);
     buy = await Buy.findOne({ where: { id: buy.id }, include: [User] });
-    // update stock after buy
+
     res.send({ msg: "buy created", buy });
   } catch (error) {
     console.log("error=>", error);

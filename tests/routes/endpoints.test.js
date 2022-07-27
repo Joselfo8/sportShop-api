@@ -581,7 +581,6 @@ describe("should get stock", () => {
       .get("/products/" + productData.id)
       .set("Authorization", "Bearer " + tokenAdmin);
     expect(response.status).toBe(200);
-    console.log(response.body);
     expect(response.body.product.stock).not.toBe(undefined);
   });
 });
