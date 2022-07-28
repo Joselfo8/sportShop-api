@@ -8,7 +8,7 @@ const modifiedStock = async (req, res) => {
     let { product, size, quantity, destroy } = req.body;
 
     //validaciones
-    if (!size) return res.send({ msg: "please, size is required" });
+    if (!size && product !== "ACCESSORIES") return res.send({ msg: "please, size is required" });
     size = size.toUpperCase();
 
     //i needn´t quantity to destroy size stock

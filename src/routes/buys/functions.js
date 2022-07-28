@@ -205,7 +205,6 @@ async function postBuy(req, res) {
     });
     await user.addBuy(buy);
     buy = await Buy.findOne({ where: { id: buy.id }, include: [User] });
-///////////////////////////////////////////////
 
 const email = user.email;
 //let items = ["product1", "product2", "product3"];
@@ -257,7 +256,7 @@ transporter.verify(function (error, success) {
     console.log("Server is ready to take our messages");
   }
 });
-///////////////////////////////////////////////
+
     res.send({ msg: "buy created", buy });
   } catch (error) {
     console.log("error=>", error);
