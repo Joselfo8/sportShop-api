@@ -33,8 +33,8 @@ router.post("/password-recovery", checkRole, async (req, res) => {
     port: 465, //puerto de gmail safe
     secure: true,
     auth: {
-      user: EMAILERMIO, 
-      pass: EKEYMIO, 
+      user: EMAILER1, 
+      pass: EKEY2, 
     },
   });
 

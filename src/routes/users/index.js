@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const {
+  googleLogin,
   getCheckAdmin,
   getUserData,
   postUser,
@@ -26,7 +27,10 @@ router.get(
   checkRules(["user", "admin", "guest"]),
   getCheckAdmin
 );
+//add user with google si no existe
+router.post("/google", googleLogin);
 
+// get all users
 router.get("/all", checkRole, checkRules(["admin"]), getAllUser);
 
 // get user data with id from token

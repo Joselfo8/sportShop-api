@@ -5,8 +5,40 @@ const { compare, encrypt } = require("../../helpers/handleBcrypt");
 const { tokenSign, verifyToken } = require("../../helpers/Token");
 
 const pagination = require("../../helpers/pagination");
-
+//G
+const exprees = require("express");//////////
+const { OAuth2Client } = require("google-auth-library");
+const dotenv = require("dotenv");
+dotenv.config();
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+//G
 const rols = ["admin", "user"];
+
+//google-login
+async function googleLogin(req, res,next) {
+  try{
+  const { token } = req.body;
+  const data = await client.verifyIdToken({
+    id_token: token,
+    audience: process.env.GOOGLE_CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend});
+  })
+  const { picture, name, email } = data.payload();
+  await User.findOrCreate({
+    where: { email },
+    defaults: {
+      name,
+      email,
+      avatar: picture,
+      role: "user",
+    },
+  });
+  res.status(200).send({ msg: "User created" });
+  }catch(error){
+    console.log(error);
+    next(error);
+  }
+  
+}
 
 // Get admin confirm roles by token answer true or false
 
@@ -506,4 +538,5 @@ module.exports = {
   updateShippingAddress,
   deleteShippingAddress,
   getCheckAdmin,
+  googleLogin,
 };
