@@ -2,7 +2,7 @@ const router = require("express").Router();
 
 
 
-const { EMAILER1, EKEY1, EKEY2, EMAILERMIO, EKEYMIO } = process.env;
+const { EMAILER1, EKEY1, EKEY2 } = process.env;
 
 const { checkRole } = require("../../helpers/auth"); //garantiza una secion iniciada
 
