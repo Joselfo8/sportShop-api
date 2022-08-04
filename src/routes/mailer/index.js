@@ -71,7 +71,7 @@ router.post("/send-email", (req, res) => {
   const { email, name, lastname, subject, text, html } = req.body;
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com", //"smtp.ethereal.email",
-    port: 465, //puerto de gmail seguro
+    port: 465, //puerto de gmail seguro 465
     secure: true,
     auth: {
       user: EMAILER1, //'emily.bailey89@ethereal.email',
