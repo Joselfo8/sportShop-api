@@ -30,7 +30,7 @@ router.post("/password-recovery", checkRole, async (req, res) => {
 
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com", 
-    port: 465, //puerto de gmail
+    port: 465, //puerto de gmail  465
     secure: true,
     auth: {
       user: EMAILER1, 
